@@ -2,8 +2,8 @@ package opencl
 
 // #include "opencl.h"
 import "C"
+
 import (
-	"errors"
 	"unsafe"
 )
 
@@ -26,7 +26,7 @@ func createCommandQueue(context Context, device Device) (CommandQueue, error) {
 	return CommandQueue{queue}, nil
 }
 
-func (c CommandQueue) EnqueueNDRangeKernel(kernel Kernel, workDim uint32, globalWorkSize []uint64) error {
+func (c CommandQueue) EnqueueNDRangeKernel(kernel Kernel, workDim int, globalWorkSize []uint64) error {
 	errInt := clError(C.clEnqueueNDRangeKernel(c.commandQueue,
 		kernel.kernel,
 		C.cl_uint(workDim),
@@ -36,7 +36,29 @@ func (c CommandQueue) EnqueueNDRangeKernel(kernel Kernel, workDim uint32, global
 	return clErrorToError(errInt)
 }
 
-func (c CommandQueue) EnqueueReadBuffer(buffer Buffer, blockingRead bool, dataPtr interface{}) error {
+func ToULong(x uint64) C.cl_ulong {
+	return C.cl_ulong(x)
+}
+
+func (c CommandQueue) EnqueueWriteBuffer(buffer Buffer, blockingWrite bool, size uint64, dataPtr unsafe.Pointer) error {
+	var bw C.cl_bool
+	if blockingWrite {
+		bw = C.CL_TRUE
+	} else {
+		bw = C.CL_FALSE
+	}
+
+	errInt := clError(C.clEnqueueWriteBuffer(c.commandQueue,
+		buffer.buffer,
+		bw,
+		0,
+		C.size_t(size),
+		dataPtr,
+		0, nil, nil))
+	return clErrorToError(errInt)
+}
+
+func (c CommandQueue) EnqueueReadBuffer(buffer Buffer, blockingRead bool, size uint64, dataPtr unsafe.Pointer) error {
 	var br C.cl_bool
 	if blockingRead {
 		br = C.CL_TRUE
@@ -44,22 +66,12 @@ func (c CommandQueue) EnqueueReadBuffer(buffer Buffer, blockingRead bool, dataPt
 		br = C.CL_FALSE
 	}
 
-	var ptr unsafe.Pointer
-	var dataLen uint64
-	switch p := dataPtr.(type) {
-	case []float32:
-		dataLen = uint64(len(p) * 4)
-		ptr = unsafe.Pointer(&p[0])
-	default:
-		return errors.New("Unexpected type for dataPtr")
-	}
-
 	errInt := clError(C.clEnqueueReadBuffer(c.commandQueue,
 		buffer.buffer,
 		br,
 		0,
-		C.size_t(dataLen),
-		ptr,
+		C.size_t(size),
+		dataPtr,
 		0, nil, nil))
 	return clErrorToError(errInt)
 }
