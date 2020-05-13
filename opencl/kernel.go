@@ -1,5 +1,6 @@
 package opencl
 
+// #define CL_TARGET_OPENCL_VERSION 200
 // #include "opencl.h"
 import "C"
 import (
