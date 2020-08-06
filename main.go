@@ -5,7 +5,7 @@ import (
 
 	"strings"
 
-	"github.com/MasterOfBinary/go-opencl/opencl"
+	"github.com/Inkeliz/go-opencl/opencl"
 )
 
 const (
