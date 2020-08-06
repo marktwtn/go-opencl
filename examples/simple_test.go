@@ -3,7 +3,7 @@ package examples
 import (
 	"fmt"
 
-	"github.com/MasterOfBinary/go-opencl/opencl"
+	"github.com/Inkeliz/go-opencl/opencl"
 )
 
 func ExampleSimple() {
