@@ -35,8 +35,8 @@ func (c Context) CreateProgramWithSource(programCode string) (Program, error) {
 	return createProgramWithSource(c, programCode)
 }
 
-func (c Context) CreateProgramWithBinary(programCode string) (Program, error) {
-	return createProgramWithSource(c, programCode)
+func (c Context) CreateProgramWithBinary(programCode string, device Device) (Program, error) {
+	return createProgramWithBinary(c, programCode, device)
 }
 
 func (c Context) CreateBuffer(memFlags []MemFlags, size uint64) (Buffer, error) {

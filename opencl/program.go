@@ -3,6 +3,8 @@ package opencl
 // #include "opencl.h"
 import "C"
 import (
+	"io/ioutil"
+	"os"
 	"strings"
 	"unsafe"
 )
@@ -20,6 +22,40 @@ func createProgramWithSource(context Context, programCode string) (Program, erro
 		context.context,
 		1,
 		&cs,
+		nil,
+		(*C.cl_int)(&errInt),
+	)
+	if errInt != clSuccess {
+		return Program{}, clErrorToError(errInt)
+	}
+
+	return Program{program}, nil
+}
+
+func createProgramWithBinary(context Context, programCode string, device Device) (Program, error) {
+	cs := C.CString(programCode)
+	defer C.free(unsafe.Pointer(cs))
+
+	/* Get binary file size */
+	info, err := os.Stat(programCode)
+	if err != nil {
+		return Program{}, err
+	}
+	size := info.Size()
+
+	/* Get the binary file */
+	content, err := ioutil.ReadFile(programCode)
+	if err != nil {
+		return Program{}, err
+	}
+
+	var errInt clError
+	program := C.clCreateProgramWithBinary(
+		context.context,
+		1,
+		(*C.cl_device_id)(&device.deviceID),
+		(*C.size_t)(&size),
+		(**C.uchar)(&content),
 		nil,
 		(*C.cl_int)(&errInt),
 	)
