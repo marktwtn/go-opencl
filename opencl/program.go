@@ -41,7 +41,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	if err != nil {
 		return Program{}, err
 	}
-	size := info.Size()
+	size := uint64(info.Size())
 
 	/* Get the binary file */
 	content, err := ioutil.ReadFile(programCode)
@@ -55,7 +55,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 		1,
 		(*C.cl_device_id)(&device.deviceID),
 		(*C.size_t)(&size),
-		(**C.uchar)(&content),
+		(**C.uchar)(unsafe.Pointer(&content)),
 		nil,
 		(*C.cl_int)(&errInt),
 	)
