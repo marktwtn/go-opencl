@@ -6,6 +6,7 @@ package opencl
 */
 import "C"
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -42,6 +43,8 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	/* Get binary file size */
 	info, err := os.Stat(programCode)
 	if err != nil {
+		fmt.Println("Get binary file size error")
+		fmt.Println(err.Error())
 		return Program{}, err
 	}
 	size := (C.size_t)(info.Size())
@@ -49,6 +52,8 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	/* Get the binary file */
 	content, err := ioutil.ReadFile(programCode)
 	if err != nil {
+		fmt.Println("Read binary file error")
+		fmt.Println(err.Error())
 		return Program{}, err
 	}
 	var content_ptr []*C.uchar
@@ -68,6 +73,8 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 		(*C.cl_int)(&errInt),
 	)
 	if errInt != clSuccess {
+		fmt.Println("C.clCreateProgramWithBinary fail")
+		fmt.Println(clErrorToError(errInt))
 		return Program{}, clErrorToError(errInt)
 	}
 
