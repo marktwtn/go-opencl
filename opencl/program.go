@@ -44,7 +44,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	if err != nil {
 		return Program{}, err
 	}
-	size := uint64(info.Size())
+	size := (C.size_t)(info.Size())
 
 	/* Get the binary file */
 	content, err := ioutil.ReadFile(programCode)
@@ -53,7 +53,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	}
 	var content_ptr []*C.uchar
 	content_ptr = make([]*C.uchar, 1)
-	C.memcpy(unsafe.Pointer(content_ptr[0]), unsafe.Pointer(&content[0]), (C.size_t)(size))
+	C.memcpy(unsafe.Pointer(content_ptr[0]), unsafe.Pointer(&content[0]), size)
 	defer C.free(unsafe.Pointer(content_ptr[0]))
 
 	var errInt clError
@@ -61,7 +61,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 		context.context,
 		1,
 		(*C.cl_device_id)(&device.deviceID),
-		(*C.size_t)(&size),
+		&size,
 		&content_ptr[0],
 		nil,
 		(*C.cl_int)(&errInt),
