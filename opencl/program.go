@@ -1,6 +1,9 @@
 package opencl
 
 // #include "opencl.h"
+/*
+#include <string.h>
+*/
 import "C"
 import (
 	"io/ioutil"
@@ -48,8 +51,10 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	if err != nil {
 		return Program{}, err
 	}
-	var content_ptr *byte
-	content_ptr = &content[0]
+	var content_ptr []*C.uchar
+	content_ptr = make([]*C.uchar, 1)
+	C.memcpy(unsafe.Pointer(content_ptr[0]), unsafe.Pointer(&content[0]), (C.size_t)(size))
+	defer C.free(unsafe.Pointer(content_ptr[0]))
 
 	var errInt clError
 	program := C.clCreateProgramWithBinary(
@@ -57,7 +62,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 		1,
 		(*C.cl_device_id)(&device.deviceID),
 		(*C.size_t)(&size),
-		(**C.uchar)(unsafe.Pointer(&content_ptr)),
+		&content_ptr[0],
 		nil,
 		(*C.cl_int)(&errInt),
 	)
