@@ -53,6 +53,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	}
 	var content_ptr []*C.uchar
 	content_ptr = make([]*C.uchar, 1)
+	content_ptr[0] = (*C.uchar)(C.malloc(size))
 	C.memcpy(unsafe.Pointer(content_ptr[0]), unsafe.Pointer(&content[0]), size)
 	defer C.free(unsafe.Pointer(content_ptr[0]))
 
