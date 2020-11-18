@@ -48,6 +48,8 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 	if err != nil {
 		return Program{}, err
 	}
+	var content_ptr *byte
+	content_ptr = &content[0]
 
 	var errInt clError
 	program := C.clCreateProgramWithBinary(
@@ -55,7 +57,7 @@ func createProgramWithBinary(context Context, programCode string, device Device)
 		1,
 		(*C.cl_device_id)(&device.deviceID),
 		(*C.size_t)(&size),
-		(**C.uchar)(unsafe.Pointer(&content)),
+		(**C.uchar)(unsafe.Pointer(&content_ptr)),
 		nil,
 		(*C.cl_int)(&errInt),
 	)
